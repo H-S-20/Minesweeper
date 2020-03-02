@@ -4,6 +4,8 @@ import math
 from tkinter import *
 #from astar import *
 from copy import copy, deepcopy
+from AIminesweep import AIbrain
+
 
 class Cell: #Used to flag cells
     def __init__(self,dim):
@@ -18,6 +20,7 @@ class Cell: #Used to flag cells
 class Map:
     def __init__(self, dim, numMines):
         self.dim = dim
+        self.numMines = numMines
         self.free = 2
         self.mine = 3
         self.grid = [[self.free] * dim for i in range(dim)]
@@ -45,12 +48,13 @@ class Map:
         self.new_map = 0  # 0 if no reset requested, 1 if reset requested
         self.gui_grid = [[None] * dim for i in range(dim)]
         self.gui_text = [[None] * dim for i in range(dim)]
+        self.reset_button = None
 
         self.draw_grid()
 
     
 
-    def manipGrid(self, testGrid, testCells):
+    def manipGrid(self, testGrid, testCells): 
         k = 0
         for i in range(len(testGrid)):
             for j in range(len(testGrid[i])):
@@ -61,10 +65,14 @@ class Map:
 
     def draw_grid(self):
         self.root = Tk()
-        self.root.title("MazeRunner - Part 1")
-        self.root.geometry("600x600")
-        self.root.configure(background = "black")
-        self.canvas = Canvas(self.root, width = 600, height = 600, bg = "black")
+        self.root.title("Minesweeper - Part 1")
+        self.root.geometry("600x700")
+        self.root.configure(background = "blue")
+        self.canvas = Canvas(self.root, width = 600, height = 600, bg = "red")
+        self.reset_button = Button(self.root, text = "reset", command = self.reset)       #Added button for reset
+        self.reset_button.grid(row = 0, column = 0, sticky = E, padx = 10, pady = 5, ipadx = 10)
+        self.AI_button = Button(self.root, text = "test AI", command = self.runAI)
+        self.AI_button.grid(row = 0, column = 0, sticky = W, padx = 10, pady = 5, ipadx = 10)
         #self.a_star_man_button = Button(self.root, text = "AStar Manhattan Search", command = self.a_star_man)
         #self.a_star_man_button.grid(row= 0, column = 0, sticky = W, padx = 320, pady = 10)
 
@@ -90,7 +98,7 @@ class Map:
             x1 = x1 + offset
             y1 = 0
 
-        self.canvas.grid(row=1, column=0)
+        self.canvas.grid(row=1, column=0) 
         self.root.mainloop()
 
     def mark_mine(self,*args):
@@ -110,12 +118,14 @@ class Map:
     def click_square(self,*args):
         offset = 600/self.dim
         if self.visit.grid[int(args[0].x/offset)][int(args[0].y/offset)] == 0:
+            print(args[0])
             fill = "Green"
             text = "0"
             nearMines = 0
             if self.grid[int(args[0].x/offset)][int(args[0].y/offset)] == self.mine:
+                print(args[0])
                 fill = "Red"
-                text = "D:"
+                text = "GG"
             else:
                 if int(args[0].x/offset)+1 < self.dim and self.grid[int(args[0].x/offset)+1][int(args[0].y/offset)] == self.mine: #S
                     nearMines = nearMines + 1
@@ -138,6 +148,9 @@ class Map:
             self.canvas.itemconfig(self.gui_grid[int(args[0].x/offset)][int(args[0].y/offset)], fill=fill)
             self.canvas.itemconfig(self.gui_text[int(args[0].x/offset)][int(args[0].y/offset)], text=text, font=("Papyrus", 32), fill='Black')
             self.visit.setVisited(int(args[0].x/offset),int(args[0].y/offset))
+    def runAI(self):
+        print("helo")
+        self.ai = AIbrain(self.dim,map,self.numMines)
 
     def draw_path(self):
         for i in range(len(self.gui_grid)):
@@ -146,4 +159,8 @@ class Map:
                     self.canvas.itemconfig(self.gui_grid[i][j], fill="Blue")
                 if (i,j) not in self.path_tuples and (i, j) != (0, 0) and (i, j) != (self.dim - 1, self.dim - 1) and self.grid[i][j] == 0:
                     self.canvas.itemconfig(self.gui_grid[i][j], fill="White")
+    def reset(self):
+        self.root.destroy()
+        Map(5,5)
+        
 map = Map(5, 5)
