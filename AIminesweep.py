@@ -24,6 +24,9 @@ class AIbrain:
         self.grid_prob = [[((self.numBombs)/(self.dim**2))] * self.dim for i in range(self.dim)]
         self.grid_mem = [[0] * dim for i in range(dim)]
         self.grid_known = [[0] * dim for i in range(dim)]
+        
+        print(" ")
+
         #print probability grid
         for i in range(len(self.grid_prob)):
             print(self.grid_prob[i])

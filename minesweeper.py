@@ -2,6 +2,7 @@ import random
 from random import randint
 import math
 from tkinter import *
+from tkinter import messagebox
 #from astar import *
 from copy import copy, deepcopy
 from AIminesweep import AIbrain
@@ -66,7 +67,7 @@ class Map:
     def draw_grid(self):
         self.root = Tk()
         self.root.title("Minesweeper - Part 1")
-        self.root.geometry("600x700")
+        self.root.geometry("600x640")
         self.root.configure(background = "blue")
         self.canvas = Canvas(self.root, width = 600, height = 600, bg = "red")
         self.reset_button = Button(self.root, text = "reset", command = self.reset)       #Added button for reset
@@ -90,7 +91,7 @@ class Map:
                 #c.tag_bind("playbutton","<Button-1>",clicked)
 
                 self.gui_grid[i][j] = self.canvas.create_rectangle(x1, y1, x1+offset, y1+offset, fill = fill, tags="uncover_but")
-                self.gui_text[i][j] = self.canvas.create_text(x1+offset/2, y1+offset/2, text="", font=("Papyrus", 26), fill='Black')
+                self.gui_text[i][j] = self.canvas.create_text(x1+offset/2, y1+offset/2, text="", font=("Papyrus", 26), fill='Black',tags="uncover_but")
                 #self.canvas.create_text(int(args[0].x/offset)*offset+offset/2, int(args[0].y/offset)*offset+offset/2, text=text, font=("Papyrus", 26), fill='Black')
                 self.canvas.tag_bind("uncover_but","<Button-1>",self.click_square)
                 self.canvas.tag_bind("uncover_but","<Button-3>",self.mark_mine)
@@ -107,16 +108,17 @@ class Map:
         #print(args)
         if self.visit.grid[int(args[0].x/offset)][int(args[0].y/offset)] == 0:
             self.canvas.itemconfig(self.gui_grid[int(args[0].x/offset)][int(args[0].y/offset)], fill="Yellow")
-            self.canvas.itemconfig(self.gui_text[int(args[0].x/offset)][int(args[0].y/offset)], text="NO TOUCHY", font=("Papyrus", 10), fill='Black')
+            self.canvas.itemconfig(self.gui_text[int(args[0].x/offset)][int(args[0].y/offset)], text="NO TOUCHY", font=("Papyrus", math.floor(offset/12)), fill='Black')
             self.visit.setMasked(int(args[0].x/offset),int(args[0].y/offset))
 
         elif self.visit.grid[int(args[0].x/offset)][int(args[0].y/offset)] == 2:
             self.canvas.itemconfig(self.gui_grid[int(args[0].x/offset)][int(args[0].y/offset)], fill="White")
-            self.canvas.itemconfig(self.gui_text[int(args[0].x/offset)][int(args[0].y/offset)], text="", font=("Papyrus", 10), fill='Black')
+            self.canvas.itemconfig(self.gui_text[int(args[0].x/offset)][int(args[0].y/offset)], text="", font=("Papyrus", math.floor(offset/12)), fill='Black')
             self.visit.setFree(int(args[0].x/offset),int(args[0].y/offset))
 
     def click_square(self,*args):
         offset = 600/self.dim
+        mineText = "GG"
         if self.visit.grid[int(args[0].x/offset)][int(args[0].y/offset)] == 0:
             print(args[0])
             fill = "Green"
@@ -125,7 +127,7 @@ class Map:
             if self.grid[int(args[0].x/offset)][int(args[0].y/offset)] == self.mine:
                 print(args[0])
                 fill = "Red"
-                text = "GG"
+                text = mineText
             else:
                 if int(args[0].x/offset)+1 < self.dim and self.grid[int(args[0].x/offset)+1][int(args[0].y/offset)] == self.mine: #S
                     nearMines = nearMines + 1
@@ -147,10 +149,12 @@ class Map:
                 text = str(nearMines)
             self.canvas.itemconfig(self.gui_grid[int(args[0].x/offset)][int(args[0].y/offset)], fill=fill)
             self.canvas.itemconfig(self.gui_text[int(args[0].x/offset)][int(args[0].y/offset)], text=text, font=("Papyrus", 32), fill='Black')
+            if(text == mineText):
+                messagebox.showinfo("Result","You lost!")
+                self.reset()
             self.visit.setVisited(int(args[0].x/offset),int(args[0].y/offset))
     def runAI(self):
-        print("helo")
-        self.ai = AIbrain(self.dim,map,self.numMines)
+        self.ai = AIbrain(self,self.dim,self.numMines)
 
     def draw_path(self):
         for i in range(len(self.gui_grid)):
