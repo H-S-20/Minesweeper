@@ -5,13 +5,23 @@ from tkinter import *
 from copy import copy, deepcopy
 #import minesweeper
 
+class Cell: #Used to flag cells
+    def __init__(self,dim):
+        self.grid = [[0] * dim for i in range(dim)]
+    def setVisited(self,x,y):
+        self.grid[x][y] = 1
+    def setMasked(self,x,y):
+        self.grid[x][y] = 2
+    def setFree(self,x,y):
+        self.grid[x][y] = 0
 
 class AIbrain:
     def __init__(self, map, dim, numBombs):
         self.dim = dim
         self.map = map
         self.numBombs = numBombs
-        self.grid_prob = [[((numBombs)/(dim**2))] * dim for i in range(dim)]
+        #self.visit = Cell(self.dim)
+        self.grid_prob = [[((self.numBombs)/(self.dim**2))] * self.dim for i in range(self.dim)]
         self.grid_mem = [[0] * dim for i in range(dim)]
         self.grid_known = [[0] * dim for i in range(dim)]
         #print probability grid
@@ -67,5 +77,5 @@ class AIbrain:
             self.map.canvas.itemconfig(self.map.gui_grid[xval][yval], fill=fill)
             self.map.canvas.itemconfig(self.map.gui_text[xval][yval], text=text, font=("Papyrus", 32), fill='Black')
             self.map.visit.setVisited(xval,yval)
-
+            #grid may not exist in the cell class yet. this may slve the issue but also comment out Cell in this class before testing
 #AIbrain(5,5)
