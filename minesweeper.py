@@ -105,15 +105,15 @@ class Map:
         offset = 600/self.dim
         #print(self.canvas.itemcget(self.gui_grid[int(args[0].x/offset)][int(args[0].y/offset)],"state"))
         #print(args)
-        if self.visit.grid[int(args[0].x/offset)][int(args[0].y/offset)] == 0:
+        if self.visit.grid[int(args[0].y/offset)][int(args[0].x/offset)] == 0:
             self.canvas.itemconfig(self.gui_grid[int(args[0].x/offset)][int(args[0].y/offset)], fill="Yellow")
             self.canvas.itemconfig(self.gui_text[int(args[0].x/offset)][int(args[0].y/offset)], text="NO TOUCHY", font=("Papyrus", math.floor(offset/12)), fill='Black')
-            self.visit.setMasked(int(args[0].x/offset),int(args[0].y/offset))
+            self.visit.setMasked(int(args[0].y/offset),int(args[0].x/offset))
 
-        elif self.visit.grid[int(args[0].x/offset)][int(args[0].y/offset)] == 2:
+        elif self.visit.grid[int(args[0].y/offset)][int(args[0].x/offset)] == 2:
             self.canvas.itemconfig(self.gui_grid[int(args[0].x/offset)][int(args[0].y/offset)], fill="White")
             self.canvas.itemconfig(self.gui_text[int(args[0].x/offset)][int(args[0].y/offset)], text="", font=("Papyrus", math.floor(offset/12)), fill='Black')
-            self.visit.setFree(int(args[0].x/offset),int(args[0].y/offset))
+            self.visit.setFree(int(args[0].y/offset),int(args[0].x/offset))
 
     def click_square(self,*args):
         offset = 600/self.dim
