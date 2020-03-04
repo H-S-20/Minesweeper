@@ -5,7 +5,7 @@ from tkinter import *
 from tkinter import messagebox
 #from astar import *
 from copy import copy, deepcopy
-from AIminesweep import AIbrain
+from AIminesweep import AIBrain
 
 
 class Cell: #Used to flag cells
@@ -41,7 +41,7 @@ class Map:
         for i in range(len(self.grid)):
             print(self.grid[i])
 
-
+        self.init_ai = 0
         # GUI variables
         self.root = None
         self.canvas = None
@@ -53,7 +53,6 @@ class Map:
 
         self.draw_grid()
 
-    
 
     def manipGrid(self, testGrid, testCells): 
         k = 0
@@ -72,7 +71,7 @@ class Map:
         self.canvas = Canvas(self.root, width = 600, height = 600, bg = "red")
         self.reset_button = Button(self.root, text = "reset", command = self.reset)       #Added button for reset
         self.reset_button.grid(row = 0, column = 0, sticky = E, padx = 10, pady = 5, ipadx = 10)
-        self.AI_button = Button(self.root, text = "test AI", command = self.runAI)
+        self.AI_button = Button(self.root, text = "Basic AI", command = self.run_ai)
         self.AI_button.grid(row = 0, column = 0, sticky = W, padx = 10, pady = 5, ipadx = 10)
         #self.a_star_man_button = Button(self.root, text = "AStar Manhattan Search", command = self.a_star_man)
         #self.a_star_man_button.grid(row= 0, column = 0, sticky = W, padx = 320, pady = 10)
@@ -119,42 +118,50 @@ class Map:
     def click_square(self,*args):
         offset = 600/self.dim
         mineText = "GG"
-        if self.visit.grid[int(args[0].x/offset)][int(args[0].y/offset)] == 0:
+        if self.visit.grid[int(args[0].y/offset)][int(args[0].x/offset)] == 0:
             print(args[0])
             fill = "Green"
             text = "0"
             nearMines = 0
-            if self.grid[int(args[0].x/offset)][int(args[0].y/offset)] == self.mine:
+            if self.grid[int(args[0].y/offset)][int(args[0].x/offset)] == self.mine:
                 print(args[0])
                 fill = "Red"
                 text = mineText
             else:
-                if int(args[0].x/offset)+1 < self.dim and self.grid[int(args[0].x/offset)+1][int(args[0].y/offset)] == self.mine: #S
+                if int(args[0].y/offset)+1 < self.dim and self.grid[int(args[0].y/offset)+1][int(args[0].x/offset)] == self.mine: #S
                     nearMines = nearMines + 1
-                if int(args[0].x/offset)+1 < self.dim and int(args[0].y/offset)+1 < self.dim and self.grid[int(args[0].x/offset)+1][int(args[0].y/offset)+1] == self.mine: #SE
+                if int(args[0].y/offset)+1 < self.dim and int(args[0].x/offset)+1 < self.dim and self.grid[int(args[0].y/offset)+1][int(args[0].x/offset)+1] == self.mine: #SE
                     nearMines = nearMines + 1
-                if int(args[0].y/offset)+1 < self.dim and self.grid[int(args[0].x/offset)][int(args[0].y/offset)+1] == self.mine: #E
+                if int(args[0].x/offset)+1 < self.dim and self.grid[int(args[0].y/offset)][int(args[0].x/offset)+1] == self.mine: #E
                     nearMines = nearMines + 1
-                if int(args[0].x/offset)-1 >= 0 and int(args[0].y/offset)+1 < self.dim and self.grid[int(args[0].x/offset)-1][int(args[0].y/offset)+1] == self.mine: #NE
+                if int(args[0].y/offset)-1 >= 0 and int(args[0].x/offset)+1 < self.dim and self.grid[int(args[0].y/offset)-1][int(args[0].x/offset)+1] == self.mine: #NE
                     nearMines = nearMines + 1
-                if int(args[0].x/offset)-1 >= 0 and self.grid[int(args[0].x/offset)-1][int(args[0].y/offset)] == self.mine: #N
+                if int(args[0].y/offset)-1 >= 0 and self.grid[int(args[0].y/offset)-1][int(args[0].x/offset)] == self.mine: #N
                     nearMines = nearMines + 1
-                if int(args[0].x/offset)-1 >= 0 and int(args[0].y/offset)-1 >= 0 and self.grid[int(args[0].x/offset)-1][int(args[0].y/offset)-1] == self.mine: #NW
+                if int(args[0].y/offset)-1 >= 0 and int(args[0].x/offset)-1 >= 0 and self.grid[int(args[0].y/offset)-1][int(args[0].x/offset)-1] == self.mine: #NW
                     nearMines = nearMines + 1
-                if int(args[0].y/offset)-1 >= 0 and self.grid[int(args[0].x/offset)][int(args[0].y/offset)-1] == self.mine: #W
+                if int(args[0].x/offset)-1 >= 0 and self.grid[int(args[0].y/offset)][int(args[0].x/offset)-1] == self.mine: #W
                     nearMines = nearMines + 1
-                if int(args[0].x/offset)+1 < self.dim and int(args[0].y/offset)-1 >= 0 and self.grid[int(args[0].x/offset)+1][int(args[0].y/offset)-1] == self.mine: #SW
+                if int(args[0].y/offset)+1 < self.dim and int(args[0].x/offset)-1 >= 0 and self.grid[int(args[0].y/offset)+1][int(args[0].x/offset)-1] == self.mine: #SW
                     nearMines = nearMines + 1
                 
                 text = str(nearMines)
             self.canvas.itemconfig(self.gui_grid[int(args[0].x/offset)][int(args[0].y/offset)], fill=fill)
-            self.canvas.itemconfig(self.gui_text[int(args[0].x/offset)][int(args[0].y/offset)], text=text, font=("Papyrus", 32), fill='Black')
+            self.canvas.itemconfig(self.gui_text[int(args[0].x/offset)][int(args[0].y/offset)], text=text, font=("Papyrus", int((32/(math.log(self.dim, 2))))), fill='Black')
+            print(int(args[0].y/offset))
             if(text == mineText):
                 messagebox.showinfo("Result","You lost!")
                 self.reset()
-            self.visit.setVisited(int(args[0].x/offset),int(args[0].y/offset))
-    def runAI(self):
-        self.ai = AIbrain(self,self.dim,self.numMines)
+            self.visit.setVisited(int(args[0].y/offset),int(args[0].x/offset))
+
+    def run_ai(self):
+        if self.init_ai == 0:
+            self.ai = AIBrain(self, self.dim, self.numMines)
+            self.init_ai = 1
+            self.ai.perform_query()
+            return
+
+        self.ai.perform_query()
 
     def draw_path(self):
         for i in range(len(self.gui_grid)):
@@ -163,8 +170,9 @@ class Map:
                     self.canvas.itemconfig(self.gui_grid[i][j], fill="Blue")
                 if (i,j) not in self.path_tuples and (i, j) != (0, 0) and (i, j) != (self.dim - 1, self.dim - 1) and self.grid[i][j] == 0:
                     self.canvas.itemconfig(self.gui_grid[i][j], fill="White")
+
     def reset(self):
         self.root.destroy()
-        Map(5,5)
+        Map(10, 10)
         
-map = Map(5, 5)
+map = Map(10, 10)
