@@ -94,6 +94,26 @@ class AICell:
         if self.x + 1 < self.dim and self.y - 1 >= 0 and self.ai_cells[self.x + 1][self.y - 1].status == 2:  # SW
             self.hidden_neighbors.append(self.ai_cells[self.x + 1][self.y - 1])
 
+    def count_neighbors(self):
+        count = 0
+        if self.x + 1 < self.dim:
+            count = count + 1
+        if self.x + 1 < self.dim and self.y + 1 < self.dim:
+            count = count + 1
+        if self.y + 1 < self.dim:
+            count = count + 1
+        if self.x > 0 and self.y + 1 < self.dim:
+            count = count + 1
+        if self.x > 0:
+            count = count + 1
+        if self.x > 0 and self.y > 0:
+            count = count + 1
+        if self.y > 0:
+            count = count + 1
+        if self.x + 1 < self.dim and self.y > 0:
+            count = count + 1
+        return count
+
 
 class AIBrain:
     def __init__(self, map, dim, num_mines):
@@ -119,7 +139,7 @@ class AIBrain:
 
             if self.map.grid[xval][yval] == self.map.mine:
                 fill = "Red"
-                text = "GG"
+                text = "*"
 
             if self.ai_cells[xval][yval].deduced_mine:
                 fill = "salmon"
@@ -147,7 +167,7 @@ class AIBrain:
                         self.moves.append((temp_cell.hidden_neighbors[idx].x, temp_cell.hidden_neighbors[idx].y, "mine"))
 
                 self.update_all_cells()
-                if (8 - temp_cell.near_mines) - len(temp_cell.safe_neighbors) == len(temp_cell.hidden_neighbors):
+                if (temp_cell.count_neighbors() - temp_cell.near_mines) - len(temp_cell.safe_neighbors) == len(temp_cell.hidden_neighbors):
                     # every hidden neighbor is safe
                     for idx in range(len(temp_cell.hidden_neighbors)):
                         temp_cell.hidden_neighbors[idx].status = 1
