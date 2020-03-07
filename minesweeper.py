@@ -156,15 +156,15 @@ class Map:
     def runAI(self):
         self.ai = AIbrain(self,self.dim,self.numMines)
 
-    def draw_path(self):
-        for i in range(len(self.gui_grid)):
-            for j in range(len(self.gui_grid[i])):
-                if (i, j) in self.path_tuples and (i, j) != (0, 0) and (i, j) != (self.dim-1, self.dim-1):
-                    self.canvas.itemconfig(self.gui_grid[i][j], fill="Blue")
-                if (i,j) not in self.path_tuples and (i, j) != (0, 0) and (i, j) != (self.dim - 1, self.dim - 1) and self.grid[i][j] == 0:
-                    self.canvas.itemconfig(self.gui_grid[i][j], fill="White")
+    #def draw_path(self):
+    #    for i in range(len(self.gui_grid)):
+    #        for j in range(len(self.gui_grid[i])):
+    #            if (i, j) in self.path_tuples and (i, j) != (0, 0) and (i, j) != (self.dim-1, self.dim-1):
+    #                self.canvas.itemconfig(self.gui_grid[i][j], fill="Blue")
+    #            if (i,j) not in self.path_tuples and (i, j) != (0, 0) and (i, j) != (self.dim - 1, self.dim - 1) and self.grid[i][j] == 0:
+    #                self.canvas.itemconfig(self.gui_grid[i][j], fill="White")
     def reset(self):
         self.root.destroy()
-        Map(5,5)
+        Map(10,10)
         
-map = Map(5, 5)
+map = Map(10, 10)
