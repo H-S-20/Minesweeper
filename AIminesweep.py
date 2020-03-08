@@ -174,7 +174,6 @@ class AIBrain:
                         self.moves.append((temp_cell.hidden_neighbors[idx].x, temp_cell.hidden_neighbors[idx].y, "safe"))
 
     def perform_query(self):
-        self.assess_knowledge()
         type_of_unveil = 1  # set to 1 for one by one AI moves, 2 for the AI to reveal everything it knows immediately.
 
         if len(self.moves) == 0:
@@ -193,16 +192,17 @@ class AIBrain:
                 # Case 1: Making moves one by one.
                 self.check_grid(rand_cell.x, rand_cell.y)
                 print("Testing random cell: " + str(rand_cell.x) + " " + str(rand_cell.y))
+                self.assess_knowledge()  # calls only if moves list is empty to improve performance, avoid ai/gui desync
 
                 if type_of_unveil == 2:
                     # Case 2: AI uncovers every cell it knows is safe/mark every mine it knows of immediately.
-                    self.assess_knowledge()
                     print("Making moves using knowledge gained from random test:")
                     print(self.moves)
                     for (i, j, reason) in self.moves:
                         self.check_grid(i, j)
 
                     self.moves.clear()
+
         else:
             if type_of_unveil == 1:
                 # Case 1: AI makes the next move one by one.
