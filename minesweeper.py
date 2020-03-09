@@ -5,7 +5,7 @@ from tkinter import *
 from tkinter import messagebox
 #from astar import *
 from copy import copy, deepcopy
-from AIminesweep import AIBrain
+from baseAI import AIBrain
 
 
 class Cell: #Used to flag cells
@@ -165,6 +165,6 @@ class Map:
 
     def reset(self):
         self.root.destroy()
-        Map(10,10)
+        Map(self.dim,self.numMines)
         
-map = Map(10, 10)
+map = Map(15, 30)
