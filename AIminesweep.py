@@ -6,95 +6,92 @@ class AICell:
     def __init__(self, x, y, status, dim, map, ai_cells):
         self.x = x
         self.y = y
-        self.status = status  # 1 clicked(uncovered), 2 = covered, 3 = mine
+        self.status = status  # 1 clicked(uncovered), 2 = covered, 3 = flagged, 4=exploded
         self.dim = dim
         self.map = map
         self.ai_cells = ai_cells
-        self.near_mines = 0  # the clue
-        self.count_neighbor_mines()
+        self.near_mines = self.map.clue.getClue(x,y)  # the clue
         self.safe_neighbors = []
         self.identified_mines = []
         self.hidden_neighbors = []
 
-        self.deduced_mine = False
+    def update_all(self): #Updates three lists based on the given cell's surroundings
+        self.safe_neighbors.clear() #List to identify uncovered adjacent boxes -- denoted as 1
+        self.hidden_neighbors.clear() #List to identify covered adjacent boxes -- denoted as 2
+        self.identified_mines.clear() #List to identify known adjacent mines -- denoted as 3
+        if self.x + 1 < self.dim:
+            #EAST
+            if self.ai_cells[self.x + 1][self.y].status == 1:
+                self.safe_neighbors.append(self.ai_cells[self.x + 1][self.y])
+            elif self.ai_cells[self.x + 1][self.y].status == 2:
+                self.hidden_neighbors.append(self.ai_cells[self.x + 1][self.y])
+            else:
+                self.identified_mines.append(self.ai_cells[self.x + 1][self.y])
 
-    def count_neighbor_mines(self):
-        self.near_mines = 0
-        if self.x + 1 < self.dim and self.map.grid[self.x + 1][self.y] == self.map.mine:  # S
-            self.near_mines = self.near_mines + 1
-        if self.x + 1 < self.dim and self.y + 1 < self.dim and self.map.grid[self.x + 1][self.y + 1] == self.map.mine:  # SE
-            self.near_mines = self.near_mines + 1
-        if self.y + 1 < self.dim and self.map.grid[self.x][self.y + 1] == self.map.mine:  # E
-            self.near_mines = self.near_mines + 1
-        if self.x - 1 >= 0 and self.y + 1 < self.dim and self.map.grid[self.x - 1][self.y + 1] == self.map.mine:  # NE
-            self.near_mines = self.near_mines + 1
-        if self.x - 1 >= 0 and self.map.grid[self.x - 1][self.y] == self.map.mine:  # N
-            self.near_mines = self.near_mines + 1
-        if self.x - 1 >= 0 and self.y - 1 >= 0 and self.map.grid[self.x - 1][self.y - 1] == self.map.mine:  # NW
-            self.near_mines = self.near_mines + 1
-        if self.y - 1 >= 0 and self.map.grid[self.x][self.y - 1] == self.map.mine:  # W
-            self.near_mines = self.near_mines + 1
-        if self.x + 1 < self.dim and self.y - 1 >= 0 and self.map.grid[self.x + 1][self.y - 1] == self.map.mine:  # SW
-            self.near_mines = self.near_mines + 1
+            #SOUTHEAST
+            if self.y + 1 < self.dim:
+                if self.ai_cells[self.x + 1][self.y + 1].status == 1:
+                    self.safe_neighbors.append(self.ai_cells[self.x + 1][self.y+1])
+                elif self.ai_cells[self.x + 1][self.y + 1].status == 2:
+                    self.hidden_neighbors.append(self.ai_cells[self.x + 1][self.y+1])
+                else:
+                    self.identified_mines.append(self.ai_cells[self.x + 1][self.y+1])
 
-    def update_safe_neighbors(self):
-        self.safe_neighbors.clear()
-        if self.x + 1 < self.dim and self.ai_cells[self.x + 1][self.y].status == 1:  # S
-            self.safe_neighbors.append(self.ai_cells[self.x + 1][self.y])
-        if self.x + 1 < self.dim and self.y + 1 < self.dim and self.ai_cells[self.x + 1][self.y + 1].status == 1:  # SE
-            self.safe_neighbors.append(self.ai_cells[self.x + 1][self.y + 1])
-        if self.y + 1 < self.dim and self.ai_cells[self.x][self.y + 1].status == 1:  # E
-            self.safe_neighbors.append(self.ai_cells[self.x][self.y + 1])
-        if self.x - 1 >= 0 and self.y + 1 < self.dim and self.ai_cells[self.x - 1][self.y + 1].status == 1:  # NE
-            self.safe_neighbors.append(self.ai_cells[self.x - 1][self.y + 1])
-        if self.x - 1 >= 0 and self.ai_cells[self.x - 1][self.y].status == 1:  # N
-            self.safe_neighbors.append(self.ai_cells[self.x - 1][self.y])
-        if self.x - 1 >= 0 and self.y - 1 >= 0 and self.ai_cells[self.x - 1][self.y - 1].status == 1:  # NW
-            self.safe_neighbors.append(self.ai_cells[self.x - 1][self.y - 1])
-        if self.y - 1 >= 0 and self.ai_cells[self.x][self.y - 1].status == 1:  # W
-            self.safe_neighbors.append(self.ai_cells[self.x][self.y - 1])
-        if self.x + 1 < self.dim and self.y - 1 >= 0 and self.ai_cells[self.x + 1][self.y - 1].status == 1:  # SW
-            self.safe_neighbors.append(self.ai_cells[self.x + 1][self.y - 1])
+            #NORTHEAST
+            if self.y - 1 >= 0:
+                if self.ai_cells[self.x + 1][self.y - 1].status == 1:
+                    self.safe_neighbors.append(self.ai_cells[self.x + 1][self.y-1])
+                elif self.ai_cells[self.x + 1][self.y - 1].status == 2:
+                    self.hidden_neighbors.append(self.ai_cells[self.x + 1][self.y-1])
+                else:
+                    self.identified_mines.append(self.ai_cells[self.x + 1][self.y-1])
 
-    def update_identified_mines(self):
-        self.identified_mines.clear()
-        if self.x + 1 < self.dim and self.ai_cells[self.x + 1][self.y].status == 3:  # S
-            self.identified_mines.append(self.ai_cells[self.x + 1][self.y])
-        if self.x + 1 < self.dim and self.y + 1 < self.dim and self.ai_cells[self.x + 1][self.y + 1].status == 3:  # SE
-            self.identified_mines.append(self.ai_cells[self.x + 1][self.y + 1])
-        if self.y + 1 < self.dim and self.ai_cells[self.x][self.y + 1].status == 3:  # E
-            self.identified_mines.append(self.ai_cells[self.x][self.y + 1])
-        if self.x - 1 >= 0 and self.y + 1 < self.dim and self.ai_cells[self.x - 1][self.y + 1].status == 3:  # NE
-            self.identified_mines.append(self.ai_cells[self.x - 1][self.y + 1])
-        if self.x - 1 >= 0 and self.ai_cells[self.x - 1][self.y].status == 3:  # N
-            self.identified_mines.append(self.ai_cells[self.x - 1][self.y])
-        if self.x - 1 >= 0 and self.y - 1 >= 0 and self.ai_cells[self.x - 1][self.y - 1].status == 3:  # NW
-            self.identified_mines.append(self.ai_cells[self.x - 1][self.y - 1])
-        if self.y - 1 >= 0 and self.ai_cells[self.x][self.y - 1].status == 3:  # W
-            self.identified_mines.append(self.ai_cells[self.x][self.y - 1])
-        if self.x + 1 < self.dim and self.y - 1 >= 0 and self.ai_cells[self.x + 1][self.y - 1].status == 3:  # SW
-            self.identified_mines.append(self.ai_cells[self.x + 1][self.y - 1])
+        if self.x - 1 >= 0:
+            #WEST
+            if self.ai_cells[self.x-1][self.y].status == 1:
+                self.safe_neighbors.append(self.ai_cells[self.x - 1][self.y])
+            elif self.ai_cells[self.x-1][self.y].status == 2: 
+                self.hidden_neighbors.append(self.ai_cells[self.x - 1][self.y])
+            else:
+                self.identified_mines.append(self.ai_cells[self.x - 1][self.y])
 
-    def update_hidden_neighbors(self):
-        self.hidden_neighbors.clear()
-        if self.x + 1 < self.dim and self.ai_cells[self.x + 1][self.y].status == 2:  # S
-            self.hidden_neighbors.append(self.ai_cells[self.x + 1][self.y])
-        if self.x + 1 < self.dim and self.y + 1 < self.dim and self.ai_cells[self.x + 1][self.y + 1].status == 2:  # SE
-            self.hidden_neighbors.append(self.ai_cells[self.x + 1][self.y + 1])
-        if self.y + 1 < self.dim and self.ai_cells[self.x][self.y + 1].status == 2:  # E
-            self.hidden_neighbors.append(self.ai_cells[self.x][self.y + 1])
-        if self.x - 1 >= 0 and self.y + 1 < self.dim and self.ai_cells[self.x - 1][self.y + 1].status == 2:  # NE
-            self.hidden_neighbors.append(self.ai_cells[self.x - 1][self.y + 1])
-        if self.x - 1 >= 0 and self.ai_cells[self.x - 1][self.y].status == 2:  # N
-            self.hidden_neighbors.append(self.ai_cells[self.x - 1][self.y])
-        if self.x - 1 >= 0 and self.y - 1 >= 0 and self.ai_cells[self.x - 1][self.y - 1].status == 2:  # NW
-            self.hidden_neighbors.append(self.ai_cells[self.x - 1][self.y - 1])
-        if self.y - 1 >= 0 and self.ai_cells[self.x][self.y - 1].status == 2:  # W
-            self.hidden_neighbors.append(self.ai_cells[self.x][self.y - 1])
-        if self.x + 1 < self.dim and self.y - 1 >= 0 and self.ai_cells[self.x + 1][self.y - 1].status == 2:  # SW
-            self.hidden_neighbors.append(self.ai_cells[self.x + 1][self.y - 1])
+            #SOUTHWEST
+            if self.y + 1 < self.dim:
+                if self.ai_cells[self.x - 1][self.y + 1].status == 1:
+                    self.safe_neighbors.append(self.ai_cells[self.x - 1][self.y+1])
+                elif self.ai_cells[self.x - 1][self.y + 1].status == 2:
+                    self.hidden_neighbors.append(self.ai_cells[self.x - 1][self.y+1])
+                else:
+                    self.identified_mines.append(self.ai_cells[self.x - 1][self.y+1])
 
-    def count_neighbors(self):
+            #NORTHWEST
+            if self.y - 1 < self.dim:
+                if self.ai_cells[self.x - 1][self.y - 1].status == 1:
+                    self.safe_neighbors.append(self.ai_cells[self.x - 1][self.y-1])
+                elif self.ai_cells[self.x - 1][self.y - 1].status == 2:
+                    self.hidden_neighbors.append(self.ai_cells[self.x - 1][self.y-1])
+                else:
+                    self.identified_mines.append(self.ai_cells[self.x - 1][self.y-1])
+
+        #SOUTH
+        if self.y + 1 < self.dim:
+            if self.ai_cells[self.x][self.y + 1].status == 1:  # E
+                self.safe_neighbors.append(self.ai_cells[self.x][self.y + 1])
+            elif self.ai_cells[self.x][self.y + 1].status == 2:
+                self.hidden_neighbors.append(self.ai_cells[self.x][self.y+1])
+            else:
+                self.identified_mines.append(self.ai_cells[self.x][self.y+1])
+
+        #NORTH
+        if self.y - 1 < self.dim:
+            if self.ai_cells[self.x][self.y - 1].status == 1:  # E
+                self.safe_neighbors.append(self.ai_cells[self.x][self.y - 1])
+            elif self.ai_cells[self.x][self.y - 1].status == 2:
+                self.hidden_neighbors.append(self.ai_cells[self.x][self.y-1])
+            else:
+                self.identified_mines.append(self.ai_cells[self.x][self.y-1])
+
+    def count_neighbors(self): #Used for safety detection
         count = 0
         if self.x + 1 < self.dim:
             count = count + 1
@@ -125,86 +122,88 @@ class AIBrain:
         self.moves = []
 
     def init_ai_cells(self):
-        for i in range(self.dim):
-            for j in range(self.dim):
-                self.ai_cells[i][j] = AICell(i, j, 2, self.dim, self.map, None) #Get clue value
-        for i in range(self.dim):
-            for j in range(self.dim):
-                self.ai_cells[i][j].ai_cells = self.ai_cells
+        for x in range(self.dim):
+            for y in range(self.dim):
+                self.ai_cells[x][y] = AICell(x, y, 2, self.dim, self.map, None) #Get clue value, initialize lists for neighbor knowns/unknowns
+        for x in range(self.dim): 
+            for y in range(self.dim):
+                self.ai_cells[x][y].ai_cells = self.ai_cells
 
     def check_grid(self, xval, yval):
         if self.map.visit.grid[xval][yval] == 0:
             fill = "Green"
-            text = str((self.ai_cells[xval][yval]).near_mines)
+            text = str(self.map.clue.getClue(xval,yval))
 
             if self.map.grid[xval][yval] == self.map.mine:
                 fill = "Red"
-                text = "*"
+                text = "GG"
 
-            if self.ai_cells[xval][yval].deduced_mine:
-                fill = "Yellow"
+            if self.ai_cells[xval][yval].status == 3:
+                fill = "salmon"
                 text = "Flag"
 
-            self.map.canvas.itemconfig(self.map.gui_grid[yval][xval], fill=fill)
-            self.map.canvas.itemconfig(self.map.gui_text[yval][xval], text=text, font=("Papyrus", int(32/math.log(self.dim, 2))), fill='Black')
+            self.map.canvas.itemconfig(self.map.gui_grid[xval][yval], fill=fill)
+            self.map.canvas.itemconfig(self.map.gui_text[xval][yval], text=text, font=("Papyrus", int(32/math.log(self.dim, 2))), fill='Black')
 
-            if fill != "Yellow":
+            if fill == "Green":
                 self.ai_cells[xval][yval].status = 1 #Set to uncovered
                 self.map.visit.setVisited(xval, yval) #Update map
+            
+            if fill == "Red":
+                self.ai_cells[xval][yval].status = 4 #Set to exploded
+                self.map.visit.setVisited(xval, yval) #Update map
+
+    def update_all_cells(self):
+        for x in range(len(self.ai_cells)):
+            for y in range(len(self.ai_cells[0])):
+                if self.ai_cells[x][y].status == 1:
+                    self.ai_cells[x][y].update_all()
 
     def assess_knowledge(self):
         self.update_all_cells()
-        for i in range(len(self.ai_cells)):
-            for j in range(len(self.ai_cells[i])):
-                temp_cell = self.ai_cells[i][j]
-                if temp_cell.status == 2:
-                    continue
-                if temp_cell.near_mines - len(temp_cell.identified_mines) == len(temp_cell.hidden_neighbors):
-                    # every hidden neighbor is a mine
-                    for idx in range(len(temp_cell.hidden_neighbors)):
-                        temp_cell.hidden_neighbors[idx].status = 3
-                        temp_cell.hidden_neighbors[idx].deduced_mine = True
-                        self.moves.append((temp_cell.hidden_neighbors[idx].x, temp_cell.hidden_neighbors[idx].y, "mine"))
+        for x in range(len(self.ai_cells)):
+            for y in range(len(self.ai_cells[0])):
+                temp_cell = self.ai_cells[x][y]
+                if temp_cell.status == 1: #If cell is uncovered
+                    if temp_cell.near_mines - len(temp_cell.identified_mines) == len(temp_cell.hidden_neighbors):
+                    #if clue - known adjacent mines = covered squares left
+                        # Every hidden neighbor is a mine
+                        for i in range(len(temp_cell.hidden_neighbors)):
+                            temp_cell.hidden_neighbors[i].status = 3
+                            self.moves.append((temp_cell.hidden_neighbors[i].x, temp_cell.hidden_neighbors[i].y))
 
-                self.update_all_cells()
-                if (temp_cell.count_neighbors() - temp_cell.near_mines) - len(temp_cell.safe_neighbors) == len(temp_cell.hidden_neighbors):
-                    # every hidden neighbor is safe
-                    for idx in range(len(temp_cell.hidden_neighbors)):
-                        temp_cell.hidden_neighbors[idx].status = 1
-                        self.moves.append((temp_cell.hidden_neighbors[idx].x, temp_cell.hidden_neighbors[idx].y, "safe"))
-
+                    self.update_all_cells()
+                    #print("("+repr(x)+", "+repr(y)+") "+repr(temp_cell.count_neighbors())+" "+repr(temp_cell.near_mines)+" "+repr(len(temp_cell.safe_neighbors))+" "+repr(len(temp_cell.hidden_neighbors)))
+                    if (temp_cell.count_neighbors() - temp_cell.near_mines) - len(temp_cell.safe_neighbors) == len(temp_cell.hidden_neighbors):
+                    #if (all adjacents - clue) - all uncovered adjacents = covered squares left
+                        # Every hidden neighbor is safe
+                        for i in range(len(temp_cell.hidden_neighbors)):
+                            temp_cell.hidden_neighbors[i].status = 1
+                            self.moves.append((temp_cell.hidden_neighbors[i].x, temp_cell.hidden_neighbors[i].y))
+    
     def perform_query(self):
         self.assess_knowledge()
-        if len(self.moves) == 0:
-            # after assessing all known info, no hidden cell can be conclusively identified as a mine or safe
-            uncovered = []
-            for i in range(len(self.ai_cells)):
-                for j in range(len(self.ai_cells[i])):
+        if len(self.moves) == 0: # After assessing all knowns, no hidden cell can be marked as a mine or safe
+            covered = []
+            for i in range(len(self.ai_cells)): #Generate list of all unknown cells
+                for j in range(len(self.ai_cells[0])):
                     if self.ai_cells[i][j].status == 2:
-                        uncovered.append(self.ai_cells[i][j])
+                        covered.append(self.ai_cells[i][j])
 
-            # choose randomly from uncovered cells
-            if len(uncovered) > 0:
-                rand_idx = randint(0, len(uncovered) - 1)
-                rand_cell = uncovered[rand_idx]
+            # Choose randomly from covered cells
+            if len(covered) > 0:
+                rand_idx = randint(0, len(covered) - 1)
+                rand_cell = covered[rand_idx]
                 self.check_grid(rand_cell.x, rand_cell.y)
                 print("Testing random cell: " + str(rand_cell.x) + " " + str(rand_cell.y))
         else:
             print("Moves:", end="")
             print(self.moves)
-            for (i, j, reason) in self.moves:
+            for (i, j) in self.moves:
                 self.check_grid(i, j)
 
             self.moves.clear()
-            # self.print_grids()
-
-    def update_all_cells(self):
-        for i in range(len(self.ai_cells)):
-            for j in range(len(self.ai_cells[i])):
-                temp_cell = self.ai_cells[i][j]
-                temp_cell.update_safe_neighbors()
-                temp_cell.update_hidden_neighbors()
-                temp_cell.update_identified_mines()
+            #self.print_grids()
 
     # Used for debugging
     def print_grids(self):
