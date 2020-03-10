@@ -6,7 +6,7 @@ from tkinter import messagebox
 #from astar import *
 from copy import copy, deepcopy
 from baseAI import AIBrain
-
+from advAI import AdvAIBrain
 
 class Cell: #Used to flag cells
     def __init__(self,dim):
@@ -60,6 +60,8 @@ class Map:
             print(self.clue.grid[i])
 
         self.init_ai = 0
+        self.init_adv_ai = 0
+
         # GUI variables
         self.root = None
         self.canvas = None
@@ -80,7 +82,10 @@ class Map:
         self.reset_button.grid(row = 0, column = 0, sticky = E, padx = 10, pady = 5, ipadx = 10)
         self.AI_button = Button(self.root, text = "Basic AI")#, command = self.run_ai)
         self.AI_button.bind("<ButtonPress-1>",self.run_ai)
-        self.AI_button.grid(row = 0, column = 0, sticky = W, padx = 10, pady = 5, ipadx = 10)
+        self.AI_button.grid(row = 0, column = 0, sticky = W, padx = 200, pady = 5, ipadx = 10)
+        self.adv_AI_button = Button(self.root, text="Advanced AI")
+        self.adv_AI_button.bind("<ButtonPress-1>", self.run_adv_ai)
+        self.adv_AI_button.grid(row=0, column=0, sticky=W, padx=10, pady=5, ipadx=10)
 
         x1 = 0
         y1 = 0
@@ -162,6 +167,15 @@ class Map:
             return
 
         self.ai.perform_query()
+
+    def run_adv_ai(self, *args):
+        if self.init_adv_ai == 0:
+            self.adv_ai = AdvAIBrain(self, self.dim, self.numMines)
+            self.init_adv_ai = 1
+            self.adv_ai.perform_query()
+            return
+
+        self.adv_ai.perform_query()
 
     def reset(self):
         self.root.destroy()
