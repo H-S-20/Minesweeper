@@ -54,10 +54,10 @@ class Map:
         for i in range(len(self.grid)):
             print(self.grid[i])
 
-        print("")
-        # Print grid
-        for i in range(len(self.grid)):
-            print(self.clue.grid[i])
+        # print("")
+        # # Print grid
+        # for i in range(len(self.grid)):
+        #     print(self.clue.grid[i])
 
         self.init_ai = 0
         self.init_adv_ai = 0
@@ -82,7 +82,7 @@ class Map:
         self.reset_button.grid(row = 0, column = 0, sticky = E, padx = 10, pady = 5, ipadx = 10)
         self.AI_button = Button(self.root, text = "Basic AI")#, command = self.run_ai)
         self.AI_button.bind("<ButtonPress-1>",self.run_ai)
-        self.AI_button.grid(row = 0, column = 0, sticky = W, padx = 200, pady = 5, ipadx = 10)
+        self.AI_button.grid(row = 0, column = 0, sticky = E, padx = 260, pady = 5, ipadx = 10)
         self.adv_AI_button = Button(self.root, text="Advanced AI")
         self.adv_AI_button.bind("<ButtonPress-1>", self.run_adv_ai)
         self.adv_AI_button.grid(row=0, column=0, sticky=W, padx=10, pady=5, ipadx=10)
@@ -181,4 +181,4 @@ class Map:
         self.root.destroy()
         Map(self.dim,self.numMines)
         
-map = Map(15, 30)
+map = Map(14, 14)
