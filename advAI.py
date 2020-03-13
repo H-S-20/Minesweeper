@@ -11,13 +11,33 @@ class AICell:
         self.dim = dim
         self.map = map
         self.ai_cells = ai_cells
-        self.near_mines = self.map.clue.getClue(x, y)  # the clue
+        self.near_mines = 0
+        self.count_neighbor_mines()
         self.safe_neighbors = []
         self.identified_mines = []
         self.hidden_neighbors = []
 
         self.mine_guess = -1
         self.mine_final = -1
+
+    def count_neighbor_mines(self):
+        self.near_mines = 0
+        if self.x + 1 < self.dim and self.map.grid[self.x + 1][self.y] == self.map.mine:  # S
+            self.near_mines = self.near_mines + 1
+        if self.x + 1 < self.dim and self.y + 1 < self.dim and self.map.grid[self.x + 1][self.y + 1] == self.map.mine:  # SE
+            self.near_mines = self.near_mines + 1
+        if self.y + 1 < self.dim and self.map.grid[self.x][self.y + 1] == self.map.mine:  # E
+            self.near_mines = self.near_mines + 1
+        if self.x - 1 >= 0 and self.y + 1 < self.dim and self.map.grid[self.x - 1][self.y + 1] == self.map.mine:  # NE
+            self.near_mines = self.near_mines + 1
+        if self.x - 1 >= 0 and self.map.grid[self.x - 1][self.y] == self.map.mine:  # N
+            self.near_mines = self.near_mines + 1
+        if self.x - 1 >= 0 and self.y - 1 >= 0 and self.map.grid[self.x - 1][self.y - 1] == self.map.mine:  # NW
+            self.near_mines = self.near_mines + 1
+        if self.y - 1 >= 0 and self.map.grid[self.x][self.y - 1] == self.map.mine:  # W
+            self.near_mines = self.near_mines + 1
+        if self.x + 1 < self.dim and self.y - 1 >= 0 and self.map.grid[self.x + 1][self.y - 1] == self.map.mine:  # SW
+            self.near_mines = self.near_mines + 1
 
     def update_all(self):  # Updates three lists based on the given cell's surroundings
         self.safe_neighbors.clear()  # List to identify uncovered adjacent boxes -- denoted as 1
@@ -173,7 +193,7 @@ class AdvAIBrain:
         for x in range(len(self.ai_cells)):
             for y in range(len(self.ai_cells[0])):
                 # if self.ai_cells[x][y].status == 1:
-                    self.ai_cells[x][y].update_all()
+                self.ai_cells[x][y].update_all()
 
     def assess_knowledge(self):
         self.update_all_cells()
@@ -204,6 +224,7 @@ class AdvAIBrain:
         self.fringe.clear()
         self.constraints.clear()
         self.possible_sol.clear()
+        self.update_all_cells()
         for i in range(len(self.ai_cells)):
             for j in range(len(self.ai_cells[i])):
                 curr = self.ai_cells[i][j]
@@ -223,7 +244,7 @@ class AdvAIBrain:
         return distinct_list
 
     def produce_constraints(self, cell):
-        self.constraints.append(Constraint(cell.hidden_neighbors, cell.near_mines))
+        self.constraints.append(Constraint(cell.hidden_neighbors, (cell.near_mines - len(cell.identified_mines))))
 
     # Walks through all possible combinations of solutions to the fringe variables, stores non-pruned solutions
     def backtracking(self, idx):
@@ -322,9 +343,8 @@ class AdvAIBrain:
             if orig[i] != -2:
                 self.fringe[i].mine_final = orig[i]
 
-
     def check_answer(self):
-        print("len of fringe: " + str(len(self.fringe)))
+        # print("len of fringe: " + str(len(self.fringe)))
         for i in range(len(self.fringe)):
             if self.fringe[i].mine_final == 1:
                 self.fringe[i].status = 3
@@ -333,26 +353,3 @@ class AdvAIBrain:
                 self.fringe[i].status = 1
                 self.moves.append((self.fringe[i].x, self.fringe[i].y, "dfs0"))
 
-    def print_grids(self):
-        print("AI STATUS GRID")
-        for i in range(len(self.ai_cells)):
-            for j in range(len(self.ai_cells[i])):
-                print(self.ai_cells[i][j].status, end=" ")
-            print()
-        #print("AI GRID HIDDEN NEIGHBORS")
-
-        # for i in range(len(self.ai_cells)):
-        #     for j in range(len(self.ai_cells[i])):
-        #         print(len(self.ai_cells[i][j].hidden_neighbors), end=" ")
-        #     print()
-        print("MAP GRID")
-        for i in range(len(self.map.grid)):
-            for j in range(len(self.map.grid[i])):
-                print(self.map.grid[i][j], end=" ")
-            print()
-
-        # print("VISIT GRID")
-        # for i in range(len(self.map.visit.grid)):
-        #     for j in range(len(self.map.visit.grid[i])):
-        #         print(self.map.visit.grid[i][j], end=" ")
-        #     print()

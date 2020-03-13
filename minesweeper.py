@@ -52,7 +52,7 @@ class Map:
 
         # Print grid
         for i in range(len(self.grid)):
-            print(self.grid[i])
+                print((self.grid[i]))
 
         # print("")
         # # Print grid
@@ -181,4 +181,4 @@ class Map:
         self.root.destroy()
         Map(self.dim,self.numMines)
         
-map = Map(14, 14)
+map = Map(12, 21)
